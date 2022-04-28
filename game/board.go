@@ -1,8 +1,5 @@
 package game
 
-const ROWS = 22
-const COLS = 10
-
 type board struct {
 	canvas [][]*block
 }
@@ -45,12 +42,15 @@ func (b *board) collision(p *piece) bool {
 	return false
 }
 
-func (b *board) clearLines() {
+func (b *board) clearLines() int {
+	count := 0
 	for i := ROWS - 1; i != 0; i-- {
 		for b.canClearLine(i) {
+			count++
 			b.moveCanvasDown(i)
 		}
 	}
+	return count
 }
 
 func (b *board) moveCanvasDown(index int) {

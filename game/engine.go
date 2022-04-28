@@ -1,28 +1,41 @@
 package game
 
 import (
-	"fmt"
+	"strconv"
 
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 )
 
+// TODO: higher level -> faster
+// TODO: When game over press start for new game
+// TODO: press space to drop
+// TODO: persistent high scores
+
 const (
-	scale   = 25
-	xOffset = 150
-	yOffset = 0
+	scale   = 30
+	WIDTH   = 1024
+	HEIGHT  = 900
+	ROWS    = 22
+	COLS    = 10
+	xOffset = WIDTH/2 - COLS*scale/2
+	yOffset = HEIGHT/2 - ROWS*scale/2
+	preview = true
 )
 
 type Engine struct {
 	window   *sdl.Window
 	renderer *sdl.Renderer
-	game     *Game
+	game     *game
+	font     *ttf.Font
+	font1    *ttf.Font
 	pause    bool
 	running  bool
 }
 
 func NewEngine() (*Engine, error) {
 	game := NewGame()
-	window, err := sdl.CreateWindow("tetris", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 680, 560, sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow("tetris", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, sdl.WINDOW_SHOWN)
 	if err != nil {
 		return nil, err
 	}
@@ -32,10 +45,26 @@ func NewEngine() (*Engine, error) {
 		return nil, err
 	}
 
+	if err = ttf.Init(); err != nil {
+		panic(err)
+	}
+
+	font, err := ttf.OpenFont("font/SourceSansPro-Regular.otf", 48)
+	if err != nil {
+		panic(err)
+	}
+
+	font1, err := ttf.OpenFont("font/SourceSansPro-Regular.otf", 32)
+	if err != nil {
+		panic(err)
+	}
+
 	engine := &Engine{
 		window:   window,
 		renderer: renderer,
 		game:     game,
+		font:     font,
+		font1:    font1,
 		pause:    false,
 		running:  true,
 	}
@@ -46,13 +75,13 @@ func NewEngine() (*Engine, error) {
 func (e *Engine) Run() {
 	defer e.window.Destroy()
 	defer e.renderer.Destroy()
+	defer ttf.Quit()
 
 	counter := 0
-	// TODO: this is wonky, make it so that the ticks come in relation with fps
 	interval := 50
 
 	for e.running {
-		e.renderer.SetDrawColor(0, 0, 0, 0)
+		e.renderer.SetDrawColor(35, 35, 35, 0)
 		e.renderer.Clear()
 		// Get direction
 		direction := ""
@@ -82,18 +111,14 @@ func (e *Engine) Run() {
 		}
 
 		// Pass direction to game
-		if !e.pause {
+		if !e.pause && !e.game.gameover {
 			var tick bool
 			counter += 1
 			if counter == interval {
 				tick = true
 				counter = 0
 			}
-			err := e.game.step(direction, tick)
-			if err != nil {
-				fmt.Println("Game over!")
-				return
-			}
+			e.game.step(direction, tick)
 		}
 
 		e.render()
@@ -102,7 +127,14 @@ func (e *Engine) Run() {
 }
 
 func (e *Engine) render() {
-	// Draw canvas in the middle, next block and score besides
+	// Draw canvas
+	e.renderer.SetDrawColor(45, 45, 45, 255)
+	e.renderer.FillRect(&sdl.Rect{
+		X: xOffset - 6,
+		Y: yOffset - 6,
+		W: COLS*scale + 12,
+		H: ROWS*scale + 12,
+	})
 	for y, row := range e.game.board.canvas {
 		for x, block := range row {
 			if block != nil {
@@ -113,7 +145,90 @@ func (e *Engine) render() {
 		}
 	}
 
+	if preview {
+		e.renderNextPiece(e.game.nextPiece)
+	}
+	e.renderStats()
+
+	if e.pause {
+		e.renderPause()
+	}
+
+	if e.game.gameover {
+		e.renderGameOver()
+	}
+
+	// Draw stats
 	e.renderer.Present()
+}
+
+func (e *Engine) renderNextPiece(p *piece) {
+	for x := 0; x < 4; x++ {
+		for y := 0; y < 2; y++ {
+			for _, b := range p.blocks {
+				if b.col-4 == x && b.row == y {
+					block := b.clone()
+					block.col += COLS/2 + 2
+					e.renderBlock(block)
+				}
+			}
+		}
+	}
+}
+
+func (e *Engine) renderPause() {
+	e.renderTextBox("Pause")
+}
+
+func (e *Engine) renderGameOver() {
+	e.renderTextBox("Game Over")
+}
+
+func (e *Engine) renderTextBox(text string) {
+	e.renderer.SetDrawColor(135, 135, 135, 0)
+	w := int32(COLS * scale)
+	h := int32(4 * scale)
+	x := int32(WIDTH/2 - COLS*scale/2)
+	y := int32(HEIGHT/2 - h - h/2)
+	e.renderer.FillRect(&sdl.Rect{
+		X: x - 6,
+		Y: y - 6,
+		W: w + 12,
+		H: h + 12,
+	})
+	e.renderer.SetDrawColor(35, 35, 35, 0)
+	e.renderer.FillRect(&sdl.Rect{
+		X: x,
+		Y: y,
+		W: w,
+		H: h,
+	})
+	e.renderText(text, x+w/2, y, e.font)
+}
+
+func (e *Engine) renderText(text string, x, y int32, font *ttf.Font) error {
+	stext, err := font.RenderUTF8Blended(text, sdl.Color{
+		R: 135,
+		G: 135,
+		B: 135,
+		A: 0,
+	})
+	if err != nil {
+		return err
+	}
+	defer stext.Free()
+	texture, err := e.renderer.CreateTextureFromSurface(stext)
+	if err != nil {
+		return err
+	}
+	defer texture.Destroy()
+	e.renderer.Copy(texture, nil, &sdl.Rect{
+		X: x - stext.W/2,
+		Y: y + stext.H/2 - scale/10,
+		W: stext.W,
+		H: stext.H,
+	})
+	return nil
 }
 
 func (e *Engine) renderCanvas(x, y int) {
@@ -125,7 +240,7 @@ func (e *Engine) renderCanvas(x, y int) {
 		H: scale,
 	}
 	e.renderer.FillRect(rect)
-	e.renderer.SetDrawColor(45, 45, 45, 150)
+	e.renderer.SetDrawColor(35, 35, 35, 150)
 	e.renderer.DrawRect(rect)
 
 }
@@ -139,10 +254,18 @@ func (e *Engine) renderBlock(b *block) {
 		H: scale,
 	}
 	e.renderer.FillRect(rect)
-	e.renderer.SetDrawColor(45, 45, 45, 150)
+	e.renderer.SetDrawColor(35, 35, 35, 150)
 	e.renderer.DrawRect(rect)
 }
 
 func (e *Engine) renderStats() {
+	// w := int32(COLS * scale)
+	h := int32(4 * scale)
+	x := int32(WIDTH/2 - COLS*scale/2)
+	y := int32(HEIGHT/2 - 3*h)
+	e.renderText("Level:", x-3*scale, y, e.font1)
+	e.renderText(strconv.Itoa(int(e.game.level)), x-3*scale, y+scale+scale/2, e.font1)
 
+	e.renderText("Score:", x-3*scale, y+h, e.font1)
+	e.renderText(strconv.Itoa(int(e.game.score)), x-3*scale, y+scale+scale/2+h, e.font1)
 }
