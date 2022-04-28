@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -18,20 +20,56 @@ func TestNewBoard(t *testing.T) {
 	}
 }
 
-func TestDrawBlock(t *testing.T) {
-	board := newBoard()
-	p := randomPiece()
-	board.drawPiece(p)
+func TestDrawPiece(t *testing.T) {
+	b1 := newBoard()
+	b2 := newBoard()
+	b1.drawPiece(randomPiece())
 
-	blockExists := false
-	for i := 0; i < 2; i++ {
-		for _, c := range board.canvas[i] {
-			if c != nil {
-				blockExists = true
+	if reflect.DeepEqual(b1.canvas, b2.canvas) {
+		t.Errorf("Expected a different canvas")
+	}
+}
+
+func TestRemovePiece(t *testing.T) {
+	b1 := newBoard()
+	b2 := newBoard()
+	p := randomPiece()
+	b1.drawPiece(p)
+	b1.removePiece(p)
+
+	if !reflect.DeepEqual(b1.canvas, b2.canvas) {
+		t.Errorf("Expected the same canvas")
+	}
+}
+
+func TestClearLines(t *testing.T) {
+	b := newBoard()
+	for i := 0; i < COLS; i++ {
+		b.canvas[ROWS-1][i] = &block{}
+		b.canvas[ROWS-2][i] = &block{}
+		b.canvas[ROWS-3][i] = &block{}
+	}
+	b.clearLines()
+	if b.canvas[ROWS-1][1] != nil {
+		t.Errorf("Expected row to slide down")
+	}
+}
+
+func TestCollision(t *testing.T) {
+	// TODO: implement me
+}
+
+
+func debugPrint(canvas [][]*block) {
+	for _, row := range canvas {
+		for _, b := range row {
+			if b == nil {
+				fmt.Printf("_")
+			} else {
+				fmt.Printf("o")
 			}
 		}
+		fmt.Printf("\n")
 	}
-	if !blockExists {
-		t.Errorf("Expected piece, got empty canvas")
-	}
+	fmt.Printf("\n")
 }

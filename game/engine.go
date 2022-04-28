@@ -1,18 +1,27 @@
 package game
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/veandco/go-sdl2/sdl"
+)
+
+const (
+	scale   = 25
+	xOffset = 150
+	yOffset = 0
 )
 
 type Engine struct {
 	window   *sdl.Window
 	renderer *sdl.Renderer
 	game     *Game
+	pause    bool
+	running  bool
 }
 
-func NewEngine(game *Game) (*Engine, error) {
+func NewEngine() (*Engine, error) {
+	game := NewGame()
 	window, err := sdl.CreateWindow("tetris", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 680, 560, sdl.WINDOW_SHOWN)
 	if err != nil {
 		return nil, err
@@ -27,6 +36,8 @@ func NewEngine(game *Game) (*Engine, error) {
 		window:   window,
 		renderer: renderer,
 		game:     game,
+		pause:    false,
+		running:  true,
 	}
 
 	return engine, nil
@@ -36,25 +47,26 @@ func (e *Engine) Run() {
 	defer e.window.Destroy()
 	defer e.renderer.Destroy()
 
-	running := true
-	pause := false
+	counter := 0
+	// TODO: this is wonky, make it so that the ticks come in relation with fps
+	interval := 50
 
-	for running {
-		e.renderer.SetDrawColor(0,0,0,0)
+	for e.running {
+		e.renderer.SetDrawColor(0, 0, 0, 0)
 		e.renderer.Clear()
 		// Get direction
 		direction := ""
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
-				running = false
+				e.running = false
 			case *sdl.KeyboardEvent:
 				if t.Type != sdl.KEYDOWN {
 					break
 				}
 				switch t.Keysym.Sym {
 				case sdl.K_ESCAPE:
-					running = false
+					e.running = false
 				case sdl.K_UP:
 					direction = "UP"
 				case sdl.K_DOWN:
@@ -64,27 +76,39 @@ func (e *Engine) Run() {
 				case sdl.K_LEFT:
 					direction = "LEFT"
 				case sdl.K_p:
-					pause = !pause
+					e.pause = !e.pause
 				}
 			}
 		}
 
 		// Pass direction to game
-		if !pause {
-			e.game.step(direction)
+		if !e.pause {
+			var tick bool
+			counter += 1
+			if counter == interval {
+				tick = true
+				counter = 0
+			}
+			err := e.game.step(direction, tick)
+			if err != nil {
+				fmt.Println("Game over!")
+				return
+			}
 		}
 
 		e.render()
+		sdl.Delay(16)
 	}
 }
 
 func (e *Engine) render() {
-	drawCanvas(e.game.board.canvas)
 	// Draw canvas in the middle, next block and score besides
-	for _, row := range e.game.board.canvas {
-		for _, block := range row {
+	for y, row := range e.game.board.canvas {
+		for x, block := range row {
 			if block != nil {
 				e.renderBlock(block)
+			} else {
+				e.renderCanvas(x, y)
 			}
 		}
 	}
@@ -92,23 +116,33 @@ func (e *Engine) render() {
 	e.renderer.Present()
 }
 
-func (e *Engine) renderBlock(b *block) {
-	e.renderer.SetDrawColor(255, 255, 255, 120)
+func (e *Engine) renderCanvas(x, y int) {
+	e.renderer.SetDrawColor(75, 75, 75, 255)
 	rect := &sdl.Rect{
-		X: int32(b.col)*10 + 200,
-		Y: int32(b.row)*10 + 200,
-		W: 10,
-		H: 10,
+		X: int32(x*scale + xOffset),
+		Y: int32(y*scale + yOffset),
+		W: scale,
+		H: scale,
 	}
 	e.renderer.FillRect(rect)
+	e.renderer.SetDrawColor(45, 45, 45, 150)
+	e.renderer.DrawRect(rect)
+
+}
+
+func (e *Engine) renderBlock(b *block) {
+	e.renderer.SetDrawColor(b.getColor())
+	rect := &sdl.Rect{
+		X: int32(b.col)*scale + xOffset,
+		Y: int32(b.row)*scale + yOffset,
+		W: scale,
+		H: scale,
+	}
+	e.renderer.FillRect(rect)
+	e.renderer.SetDrawColor(45, 45, 45, 150)
+	e.renderer.DrawRect(rect)
 }
 
 func (e *Engine) renderStats() {
 
-}
-
-func drawCanvas(canvas [][]*block) {
-	for _, r := range canvas {
-		log.Println(r)
-	}
 }
