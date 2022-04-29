@@ -6,6 +6,7 @@ import (
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
+	"github.com/sochsenreither/tetris-go/game"
 )
 
 func (e *Engine) render() {
@@ -14,8 +15,8 @@ func (e *Engine) render() {
 	e.renderer.FillRect(&sdl.Rect{
 		X: xOffset - 6,
 		Y: yOffset - 6,
-		W: COLS*scale + 12,
-		H: ROWS*scale + 12,
+		W: game.COLS*scale + 12,
+		H: game.ROWS*scale + 12,
 	})
 	for y, row := range e.game.Canvas() {
 		for x, block := range row {
@@ -50,7 +51,7 @@ func (e *Engine) renderNextPiece() {
 		for y := 0; y < 2; y++ {
 			for _, block := range p.Blocks() {
 				if block.Col()-4 == x && block.Row() == y {
-					e.renderBlock(block.Col() + COLS/2 + 2, block.Row(), block.Color())
+					e.renderBlock(block.Col() + game.COLS/2 + 2, block.Row(), block.Color())
 				}
 			}
 		}
@@ -67,9 +68,9 @@ func (e *Engine) renderGameOver() {
 
 func (e *Engine) renderTextBox(text string) {
 	e.renderer.SetDrawColor(135, 135, 135, 0)
-	w := int32(COLS * scale)
+	w := int32(game.COLS * scale)
 	h := int32(4 * scale)
-	x := int32(WIDTH/2 - COLS*scale/2)
+	x := int32(WIDTH/2 - game.COLS*scale/2)
 	y := int32(HEIGHT/2 - h - h/2)
 	e.renderer.FillRect(&sdl.Rect{
 		X: x - 6,
@@ -143,7 +144,7 @@ func (e *Engine) renderBlock(x, y int, color color.Color) {
 func (e *Engine) renderStats() {
 	// w := int32(COLS * scale)
 	h := int32(4 * scale)
-	x := int32(WIDTH/2 - COLS*scale/2)
+	x := int32(WIDTH/2 - game.COLS*scale/2)
 	y := int32(HEIGHT/2 - 3*h)
 	e.renderText("Level:", x-3*scale, y, e.font1)
 	e.renderText(strconv.Itoa(int(e.game.Level())), x-3*scale, y+scale+scale/2, e.font1)

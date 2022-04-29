@@ -1,24 +1,20 @@
 package engine
 
 import (
+	"math/rand"
+	"time"
+
+	"github.com/sochsenreither/tetris-go/game"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
-	"github.com/sochsenreither/tetris-go/game"
 )
-
-// TODO: higher level -> faster
-// TODO: When game over press start for new game
-// TODO: press space to drop
-// TODO: persistent high scores
 
 const (
 	scale   = 30
 	WIDTH   = 1024
 	HEIGHT  = 900
-	ROWS    = 22
-	COLS    = 10
-	xOffset = WIDTH/2 - COLS*scale/2
-	yOffset = HEIGHT/2 - ROWS*scale/2
+	xOffset = WIDTH/2 - game.COLS*scale/2
+	yOffset = HEIGHT/2 - game.ROWS*scale/2
 	preview = true
 )
 
@@ -33,6 +29,7 @@ type Engine struct {
 }
 
 func NewEngine() (*Engine, error) {
+	rand.Seed(time.Now().Unix())
 	game := game.NewGame()
 	window, err := sdl.CreateWindow("tetris", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, sdl.WINDOW_SHOWN)
 	if err != nil {

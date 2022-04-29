@@ -13,15 +13,6 @@ func (b *Block) Color() color.Color {
 	return b.color
 }
 
-func (b *Block) Clone() *Block {
-	return &Block{
-		row:      b.row,
-		col:      b.col,
-		color:    b.color,
-		inactive: b.inactive,
-	}
-}
-
 func (b *Block) Row() int {
 	return b.row
 }

@@ -64,7 +64,7 @@ func (b *board) moveCanvasDown(index int) {
 			if b.canvas[i-1][j] == nil {
 				b.canvas[i][j] = nil
 			} else {
-				b.canvas[i][j] = b.canvas[i-1][j].Clone()
+				b.canvas[i][j] = b.canvas[i-1][j]
 				b.canvas[i][j].row += 1
 				b.canvas[i-1][j] = nil
 			}

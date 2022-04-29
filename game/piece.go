@@ -5,6 +5,27 @@ import (
 	"math/rand"
 )
 
+var pieces []*piece
+
+func initPieces() {
+	pieces = []*piece{
+		iPiece(),
+		jPiece(),
+		lPiece(),
+		oPiece(),
+		sPiece(),
+		tPiece(),
+		zPiece(),
+	}
+	rand.Shuffle(len(pieces), func(i, j int) { pieces[i], pieces[j] = pieces[j], pieces[i] })
+}
+
+func popPiece() *piece {
+	p := pieces[0]
+	pieces = pieces[1:]
+	return p
+}
+
 var (
 	mint        = color.RGBA{72, 207, 173, 255}
 	bluejeans   = color.RGBA{93, 156, 236, 255}
@@ -55,18 +76,11 @@ func (p *piece) move(x, y int) *piece {
 
 func (p *piece) rotate() *piece {
 	if p.t == "O" {
-		blocks := make([]*Block, 4)
-		for i := range blocks {
-			blocks[i] = p.blocks[i].Clone()
-		}
-		return &piece{
-			t:      p.t,
-			blocks: blocks,
-		}
+		return p
 	}
 
 	blocks := make([]*Block, 4)
-	pivot := p.blocks[0].Clone()
+	pivot := p.blocks[0]
 	blocks[0] = pivot
 
 	for i := range blocks {
@@ -95,20 +109,13 @@ func (p *piece) setInactive() {
 }
 
 func randomPiece() *piece {
-	pieces := []func() *piece{
-		iPiece,
-		jPiece,
-		lPiece,
-		oPiece,
-		sPiece,
-		tPiece,
-		zPiece,
+	if len(pieces) == 0 {
+		initPieces()
 	}
-	i := rand.Intn(len(pieces))
-	p := pieces[i]()
+	p := popPiece()
 	// Spawns the block in the middle of the canvas
 	for _, b := range p.blocks {
-		b.col += 4
+		b.col += COLS/2 - 1
 	}
 	return p
 }

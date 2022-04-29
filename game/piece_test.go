@@ -7,11 +7,11 @@ import (
 
 func TestRandomPiece(t *testing.T) {
 	pieces := make(map[string]bool)
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 7; i++ {
 		pieces[randomPiece().t] = true
 	}
 	if len(pieces) != 7 {
-		t.Errorf("Expected to get every piece eventually, only got %d", len(pieces))
+		t.Errorf("Expected to get every piece within seven tries, only got %d", len(pieces))
 	}
 }
 
