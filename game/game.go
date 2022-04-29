@@ -1,6 +1,6 @@
 package game
 
-type game struct {
+type Game struct {
 	board        *board
 	activePiece  *piece
 	nextPiece    *piece
@@ -10,8 +10,8 @@ type game struct {
 	gameover     bool
 }
 
-func NewGame() *game {
-	return &game{
+func NewGame() *Game {
+	return &Game{
 		board:        newBoard(),
 		activePiece:  nil,
 		nextPiece:    nil,
@@ -22,7 +22,7 @@ func NewGame() *game {
 	}
 }
 
-func (g *game) step(direction string, tick bool) {
+func (g *Game) Step(direction string, tick bool) {
 	// If there is no active piece spawn a new one
 	if g.activePiece == nil {
 		if g.nextPiece == nil {
@@ -79,7 +79,7 @@ func (g *game) step(direction string, tick bool) {
 	}
 }
 
-func (g *game) handleDroppedPiece() {
+func (g *Game) handleDroppedPiece() {
 	g.board.drawPiece(g.activePiece)
 	g.activePiece.setInactive()
 	count := g.board.clearLines()
@@ -89,4 +89,24 @@ func (g *game) handleDroppedPiece() {
 
 	g.score += points[count] * (g.level + 1)
 	g.clearedLines += uint(count)
+}
+
+func (g *Game) GameOVer() bool {
+	return g.gameover
+}
+
+func (g *Game) Canvas() [][]*Block {
+	return g.board.canvas
+}
+
+func (g *Game) NextPiece() *piece {
+	return g.nextPiece
+}
+
+func (g *Game) Level() uint {
+	return g.level
+}
+
+func (g *Game) Score() uint {
+	return g.score
 }

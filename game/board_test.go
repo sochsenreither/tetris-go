@@ -45,9 +45,9 @@ func TestRemovePiece(t *testing.T) {
 func TestClearLines(t *testing.T) {
 	b := newBoard()
 	for i := 0; i < COLS; i++ {
-		b.canvas[ROWS-1][i] = &block{}
-		b.canvas[ROWS-2][i] = &block{}
-		b.canvas[ROWS-3][i] = &block{}
+		b.canvas[ROWS-1][i] = &Block{}
+		b.canvas[ROWS-2][i] = &Block{}
+		b.canvas[ROWS-3][i] = &Block{}
 	}
 	b.clearLines()
 	if b.canvas[ROWS-1][1] != nil {
@@ -56,11 +56,48 @@ func TestClearLines(t *testing.T) {
 }
 
 func TestCollision(t *testing.T) {
-	// TODO: implement me
+	t.Run("collision with other piece", func(t *testing.T) {
+		b := newBoard()
+		p := oPiece()
+		o1 := oPiece()
+		for _, block := range p.blocks {
+			block.inactive = true
+		}
+		b.drawPiece(p)
+		if !b.collision(o1) {
+			t.Errorf("Expected a collision")
+		}
+	})
+
+	t.Run("collision out of bounds", func(t *testing.T) {
+		b := newBoard()
+		p := randomPiece()
+		p.blocks[0].col, p.blocks[0].row = -1, 0
+		if !b.collision(p) {
+			t.Errorf("Expected a collision")
+		}
+		p.blocks[0].col, p.blocks[0].row = 0, ROWS
+		if !b.collision(p) {
+			t.Errorf("Expected a collision")
+		}
+	})
+	t.Run("no collision", func(t *testing.T) {
+		b := newBoard()
+		p := randomPiece()
+		if b.collision(p) {
+			t.Errorf("Didn't expect a collision")
+		}
+	})
 }
 
+func TestCanClearLine(t *testing.T) {
+	b := newBoard()
+	if b.canClearLine(0) {
+		t.Errorf("Expected false when checking if line 0 can be cleared")
+	}
+}
 
-func debugPrint(canvas [][]*block) {
+func debugPrint(canvas [][]*Block) {
 	for _, row := range canvas {
 		for _, b := range row {
 			if b == nil {

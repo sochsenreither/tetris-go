@@ -1,11 +1,11 @@
 package main
 
-import "github.com/sochsenreither/tetris-go/game"
+import "github.com/sochsenreither/tetris-go/engine"
 
 // TODO: AI
 
 func main() {
-	e, err := game.NewEngine()
+	e, err := engine.NewEngine()
 	if err != nil {
 		panic(err)
 	}

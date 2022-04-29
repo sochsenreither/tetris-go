@@ -1,13 +1,18 @@
 package game
 
+const (
+	ROWS = 22
+	COLS = 10
+)
+
 type board struct {
-	canvas [][]*block
+	canvas [][]*Block
 }
 
 func newBoard() *board {
-	canvas := make([][]*block, ROWS)
+	canvas := make([][]*Block, ROWS)
 	for i := 0; i < ROWS; i++ {
-		canvas[i] = make([]*block, COLS)
+		canvas[i] = make([]*Block, COLS)
 	}
 	return &board{
 		canvas: canvas,
@@ -59,7 +64,7 @@ func (b *board) moveCanvasDown(index int) {
 			if b.canvas[i-1][j] == nil {
 				b.canvas[i][j] = nil
 			} else {
-				b.canvas[i][j] = b.canvas[i-1][j].clone()
+				b.canvas[i][j] = b.canvas[i-1][j].Clone()
 				b.canvas[i][j].row += 1
 				b.canvas[i-1][j] = nil
 			}
