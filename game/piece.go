@@ -7,7 +7,7 @@ import (
 )
 
 type pieceFactory struct {
-	pieces []*piece
+	pieces []*Piece
 }
 
 func newPieceFactory() *pieceFactory {
@@ -18,7 +18,7 @@ func newPieceFactory() *pieceFactory {
 
 func (pf *pieceFactory) init() {
 	rand.Seed(time.Now().Unix())
-	pieces := []*piece{
+	pieces := []*Piece{
 		iPiece(),
 		jPiece(),
 		lPiece(),
@@ -31,7 +31,7 @@ func (pf *pieceFactory) init() {
 	pf.pieces = pieces
 }
 
-func (pf *pieceFactory) randomPiece() *piece {
+func (pf *pieceFactory) randomPiece() *Piece {
 	if len(pf.pieces) == 0 {
 		pf.init()
 	}
@@ -39,7 +39,7 @@ func (pf *pieceFactory) randomPiece() *piece {
 	pf.pieces = pf.pieces[1:]
 	// Spawns the block in the middle of the canvas
 	for _, b := range p.blocks {
-		b.col += COLS/2 - 1
+		b.Col += COLS/2 - 1
 	}
 	return p
 }
@@ -55,44 +55,44 @@ var (
 )
 
 // The pivot point is always at index 0.
-type piece struct {
+type Piece struct {
 	t      string
 	blocks []*Block
 }
 
-func (p *piece) Blocks() []*Block {
+func (p *Piece) Blocks() []*Block {
 	return p.blocks
 }
 
-func (p *piece) moveDown() *piece {
+func (p *Piece) moveDown() *Piece {
 	return p.move(1, 0)
 }
 
-func (p *piece) moveLeft() *piece {
+func (p *Piece) moveLeft() *Piece {
 	return p.move(0, -1)
 }
 
-func (p *piece) moveRight() *piece {
+func (p *Piece) moveRight() *Piece {
 	return p.move(0, 1)
 }
 
-func (p *piece) move(x, y int) *piece {
+func (p *Piece) move(x, y int) *Piece {
 	blocks := make([]*Block, 4)
 	for i := range p.blocks {
 		blocks[i] = &Block{
-			row:      p.blocks[i].row + x,
-			col:      p.blocks[i].col + y,
-			color:    p.blocks[i].color,
-			inactive: p.blocks[i].inactive,
+			Row:      p.blocks[i].Row + x,
+			Col:      p.blocks[i].Col + y,
+			Color:    p.blocks[i].Color,
+			Inactive: p.blocks[i].Inactive,
 		}
 	}
-	return &piece{
+	return &Piece{
 		t:      p.t,
 		blocks: blocks,
 	}
 }
 
-func (p *piece) rotate() *piece {
+func (p *Piece) rotate() *Piece {
 	if p.t == "O" {
 		return p
 	}
@@ -105,107 +105,107 @@ func (p *piece) rotate() *piece {
 		if i == 0 {
 			continue
 		}
-		dRow := pivot.row - p.blocks[i].row
-		dCol := pivot.col - p.blocks[i].col
+		dRow := pivot.Row - p.blocks[i].Row
+		dCol := pivot.Col - p.blocks[i].Col
 		blocks[i] = &Block{
-			row:      pivot.row + (dCol * -1),
-			col:      pivot.col + dRow,
-			color:    p.blocks[0].color,
-			inactive: p.blocks[0].inactive,
+			Row:      pivot.Row + (dCol * -1),
+			Col:      pivot.Col + dRow,
+			Color:    p.blocks[0].Color,
+			Inactive: p.blocks[0].Inactive,
 		}
 	}
-	return &piece{
+	return &Piece{
 		t:      p.t,
 		blocks: blocks,
 	}
 }
 
-func (p *piece) setInactive() {
+func (p *Piece) setInactive() {
 	for _, b := range p.blocks {
-		b.inactive = true
+		b.Inactive = true
 	}
 }
 
-func iPiece() *piece {
-	return &piece{
+func iPiece() *Piece {
+	return &Piece{
 		t: "I",
 		blocks: []*Block{
-			{row: 1, col: 2, color: mint, inactive: false},
-			{row: 1, col: 1, color: mint, inactive: false},
-			{row: 1, col: 0, color: mint, inactive: false},
-			{row: 1, col: 3, color: mint, inactive: false},
+			{Row: 1, Col: 2, Color: mint, Inactive: false},
+			{Row: 1, Col: 1, Color: mint, Inactive: false},
+			{Row: 1, Col: 0, Color: mint, Inactive: false},
+			{Row: 1, Col: 3, Color: mint, Inactive: false},
 		},
 	}
 }
 
-func lPiece() *piece {
-	return &piece{
+func lPiece() *Piece {
+	return &Piece{
 		t: "L",
 		blocks: []*Block{
-			{row: 1, col: 1, color: bittersweet, inactive: false},
-			{row: 1, col: 0, color: bittersweet, inactive: false},
-			{row: 1, col: 2, color: bittersweet, inactive: false},
-			{row: 0, col: 2, color: bittersweet, inactive: false},
+			{Row: 1, Col: 1, Color: bittersweet, Inactive: false},
+			{Row: 1, Col: 0, Color: bittersweet, Inactive: false},
+			{Row: 1, Col: 2, Color: bittersweet, Inactive: false},
+			{Row: 0, Col: 2, Color: bittersweet, Inactive: false},
 		},
 	}
 }
 
-func jPiece() *piece {
-	return &piece{
+func jPiece() *Piece {
+	return &Piece{
 		t: "J",
 		blocks: []*Block{
-			{row: 1, col: 1, color: bluejeans, inactive: false},
-			{row: 1, col: 0, color: bluejeans, inactive: false},
-			{row: 0, col: 0, color: bluejeans, inactive: false},
-			{row: 1, col: 2, color: bluejeans, inactive: false},
+			{Row: 1, Col: 1, Color: bluejeans, Inactive: false},
+			{Row: 1, Col: 0, Color: bluejeans, Inactive: false},
+			{Row: 0, Col: 0, Color: bluejeans, Inactive: false},
+			{Row: 1, Col: 2, Color: bluejeans, Inactive: false},
 		},
 	}
 }
 
-func oPiece() *piece {
-	return &piece{
+func oPiece() *Piece {
+	return &Piece{
 		t: "O",
 		blocks: []*Block{
-			{row: 0, col: 0, color: sunflower, inactive: false},
-			{row: 1, col: 1, color: sunflower, inactive: false},
-			{row: 0, col: 1, color: sunflower, inactive: false},
-			{row: 1, col: 0, color: sunflower, inactive: false},
+			{Row: 0, Col: 0, Color: sunflower, Inactive: false},
+			{Row: 1, Col: 1, Color: sunflower, Inactive: false},
+			{Row: 0, Col: 1, Color: sunflower, Inactive: false},
+			{Row: 1, Col: 0, Color: sunflower, Inactive: false},
 		},
 	}
 }
 
-func sPiece() *piece {
-	return &piece{
+func sPiece() *Piece {
+	return &Piece{
 		t: "S",
 		blocks: []*Block{
-			{row: 1, col: 1, color: grass, inactive: false},
-			{row: 1, col: 0, color: grass, inactive: false},
-			{row: 0, col: 1, color: grass, inactive: false},
-			{row: 0, col: 2, color: grass, inactive: false},
+			{Row: 1, Col: 1, Color: grass, Inactive: false},
+			{Row: 1, Col: 0, Color: grass, Inactive: false},
+			{Row: 0, Col: 1, Color: grass, Inactive: false},
+			{Row: 0, Col: 2, Color: grass, Inactive: false},
 		},
 	}
 }
 
-func tPiece() *piece {
-	return &piece{
+func tPiece() *Piece {
+	return &Piece{
 		t: "T",
 		blocks: []*Block{
-			{row: 1, col: 1, color: lavender, inactive: false},
-			{row: 1, col: 0, color: lavender, inactive: false},
-			{row: 0, col: 1, color: lavender, inactive: false},
-			{row: 1, col: 2, color: lavender, inactive: false},
+			{Row: 1, Col: 1, Color: lavender, Inactive: false},
+			{Row: 1, Col: 0, Color: lavender, Inactive: false},
+			{Row: 0, Col: 1, Color: lavender, Inactive: false},
+			{Row: 1, Col: 2, Color: lavender, Inactive: false},
 		},
 	}
 }
 
-func zPiece() *piece {
-	return &piece{
+func zPiece() *Piece {
+	return &Piece{
 		t: "Z",
 		blocks: []*Block{
-			{row: 1, col: 1, color: ruby, inactive: false},
-			{row: 0, col: 0, color: ruby, inactive: false},
-			{row: 0, col: 1, color: ruby, inactive: false},
-			{row: 1, col: 2, color: ruby, inactive: false},
+			{Row: 1, Col: 1, Color: ruby, Inactive: false},
+			{Row: 0, Col: 0, Color: ruby, Inactive: false},
+			{Row: 0, Col: 1, Color: ruby, Inactive: false},
+			{Row: 1, Col: 2, Color: ruby, Inactive: false},
 		},
 	}
 }

@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"github.com/sochsenreither/tetris-go/ai"
 	"github.com/sochsenreither/tetris-go/game"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -16,6 +17,7 @@ const (
 )
 
 type Engine struct {
+	ai        *ai.TetrisPlayer
 	window    *sdl.Window
 	renderer  *sdl.Renderer
 	game      *game.Game
@@ -52,6 +54,7 @@ func NewEngine() (*Engine, error) {
 	}
 
 	engine := &Engine{
+		ai:        &ai.TetrisPlayer{},
 		window:    window,
 		renderer:  renderer,
 		game:      game,
@@ -72,17 +75,19 @@ func (e *Engine) Run() {
 	counter := 0
 
 	for e.running {
-		interval := 50 - (int(e.game.Level()) * 3)
+		interval := 50 - (int(e.game.Level) * 3)
 		if interval < 5 {
 			interval = 5
 		}
 		e.renderer.SetDrawColor(35, 35, 35, 0)
 		e.renderer.Clear()
 		// Get direction
+		// direction := e.getPlayerMove()
 		direction := e.getPlayerMove()
+		// direction := e.ai.NextMove(e.game.Board, e.game.ActivePiece)
 
 		// Pass direction to game
-		if !e.pause && !e.game.GameOVer() {
+		if !e.pause && !e.game.Gameover {
 			var tick bool
 			counter += 1
 			if counter >= interval {

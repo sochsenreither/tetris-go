@@ -1,125 +1,105 @@
 package game
 
 type Game struct {
-	board        *board
-	activePiece  *piece
-	nextPiece    *piece
+	Board        *Board
+	ActivePiece  *Piece
+	NextPiece    *Piece
 	pieceFactory *pieceFactory
-	score        uint
-	level        uint
+	Score        uint
+	Level        uint
 	clearedLines uint
-	gameover     bool
+	Gameover     bool
 }
 
 func NewGame() *Game {
 	return &Game{
-		board:        newBoard(),
-		activePiece:  nil,
-		nextPiece:    nil,
+		Board:        NewBoard(),
+		ActivePiece:  nil,
+		NextPiece:    nil,
 		pieceFactory: newPieceFactory(),
-		score:        0,
-		level:        0,
+		Score:        0,
+		Level:        0,
 		clearedLines: 0,
-		gameover:     false,
+		Gameover:     false,
 	}
 }
 
 func (g *Game) Step(direction string, tick bool) {
 	// If there is no active piece spawn a new one
-	if g.activePiece == nil {
-		if g.nextPiece == nil {
-			g.nextPiece = g.pieceFactory.randomPiece()
+	if g.ActivePiece == nil {
+		if g.NextPiece == nil {
+			g.NextPiece = g.pieceFactory.randomPiece()
 		}
-		if g.board.collision(g.nextPiece) {
-			g.gameover = true
+		if g.Board.Collision(g.NextPiece) {
+			g.Gameover = true
 			return
 		}
-		g.activePiece = g.nextPiece
-		g.nextPiece = g.pieceFactory.randomPiece()
+		g.ActivePiece = g.NextPiece
+		g.NextPiece = g.pieceFactory.randomPiece()
 	}
 
 	if g.clearedLines >= 10 {
-		g.level++
+		g.Level++
 		g.clearedLines = 0
 	}
 
-	var p *piece
+	var p *Piece
 
 	if tick {
-		p = g.activePiece.moveDown()
-		if g.board.collision(p) {
+		p = g.ActivePiece.moveDown()
+		if g.Board.Collision(p) {
 			g.handleDroppedPiece()
 			return
 		}
-		g.board.removePiece(g.activePiece)
-		g.activePiece = p
+		g.Board.RemovePiece(g.ActivePiece)
+		g.ActivePiece = p
 	}
 
 	switch direction {
 	case "DOWN":
-		p = g.activePiece.moveDown()
-		if g.board.collision(p) {
+		p = g.ActivePiece.moveDown()
+		if g.Board.Collision(p) {
 			g.handleDroppedPiece()
 			return
 		}
-		g.score += 1
+		g.Score += 1
 	case "UP":
-		p = g.activePiece.rotate()
+		p = g.ActivePiece.rotate()
 	case "LEFT":
-		p = g.activePiece.moveLeft()
+		p = g.ActivePiece.moveLeft()
 	case "RIGHT":
-		p = g.activePiece.moveRight()
+		p = g.ActivePiece.moveRight()
 	case "SPACE":
-		collision := false
-		for !collision {
-			p = g.activePiece.moveDown()
-			if g.board.collision(p) {
+		for {
+			p = g.ActivePiece.moveDown()
+			if g.Board.Collision(p) {
 				g.handleDroppedPiece()
 				return
 			}
-			g.board.removePiece(g.activePiece)
-			g.activePiece = p
+			g.Board.RemovePiece(g.ActivePiece)
+			g.ActivePiece = p
+			g.Score += 2
 		}
 	default:
-		g.board.drawPiece(g.activePiece)
+		g.Board.DrawPiece(g.ActivePiece)
 		return
 	}
 
-	if !g.board.collision(p) {
-		g.board.removePiece(g.activePiece)
-		g.activePiece = p
-		g.board.drawPiece(g.activePiece)
+	if !g.Board.Collision(p) {
+		g.Board.RemovePiece(g.ActivePiece)
+		g.ActivePiece = p
+		g.Board.DrawPiece(g.ActivePiece)
 	}
 }
 
 func (g *Game) handleDroppedPiece() {
-	g.board.drawPiece(g.activePiece)
-	g.activePiece.setInactive()
-	count := g.board.clearLines()
-	g.activePiece = nil
+	g.Board.DrawPiece(g.ActivePiece)
+	g.ActivePiece.setInactive()
+	count := g.Board.clearLines()
+	g.ActivePiece = nil
 
 	points := []uint{0, 40, 100, 300, 1200}
 
-	g.score += points[count] * (g.level + 1)
+	g.Score += points[count] * (g.Level + 1)
 	g.clearedLines += uint(count)
-}
-
-func (g *Game) GameOVer() bool {
-	return g.gameover
-}
-
-func (g *Game) Canvas() [][]*Block {
-	return g.board.canvas
-}
-
-func (g *Game) NextPiece() *piece {
-	return g.nextPiece
-}
-
-func (g *Game) Level() uint {
-	return g.level
-}
-
-func (g *Game) Score() uint {
-	return g.score
 }

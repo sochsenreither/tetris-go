@@ -5,52 +5,52 @@ const (
 	COLS = 10
 )
 
-type board struct {
-	canvas [][]*Block
+type Board struct {
+	Canvas [][]*Block
 }
 
-func newBoard() *board {
+func NewBoard() *Board {
 	canvas := make([][]*Block, ROWS)
 	for i := 0; i < ROWS; i++ {
 		canvas[i] = make([]*Block, COLS)
 	}
-	return &board{
-		canvas: canvas,
+	return &Board{
+		Canvas: canvas,
 	}
 }
 
-func (b *board) drawPiece(p *piece) {
+func (b *Board) DrawPiece(p *Piece) {
 	for _, block := range p.blocks {
-		b.canvas[block.row][block.col] = block
+		b.Canvas[block.Row][block.Col] = block
 	}
 }
 
-func (b *board) removePiece(p *piece) {
+func (b *Board) RemovePiece(p *Piece) {
 	for _, block := range p.blocks {
-		b.canvas[block.row][block.col] = nil
+		b.Canvas[block.Row][block.Col] = nil
 	}
 }
 
-// Returns true if there is a collision
-func (b *board) collision(p *piece) bool {
+// Returns true if there is a Collision
+func (b *Board) Collision(p *Piece) bool {
 	for _, block := range p.blocks {
-		if block.row < 0 || block.row > ROWS-1 {
+		if block.Row < 0 || block.Row > ROWS-1 {
 			return true
 		}
-		if block.col < 0 || block.col > COLS-1 {
+		if block.Col < 0 || block.Col > COLS-1 {
 			return true
 		}
-		if b.canvas[block.row][block.col] != nil && b.canvas[block.row][block.col].inactive {
+		if b.Canvas[block.Row][block.Col] != nil && b.Canvas[block.Row][block.Col].Inactive {
 			return true
 		}
 	}
 	return false
 }
 
-func (b *board) clearLines() int {
+func (b *Board) clearLines() int {
 	count := 0
 	for i := ROWS - 1; i != 0; i-- {
-		for b.canClearLine(i) {
+		for b.CanClearLine(i) {
 			count++
 			b.moveCanvasDown(i)
 		}
@@ -58,26 +58,26 @@ func (b *board) clearLines() int {
 	return count
 }
 
-func (b *board) moveCanvasDown(index int) {
+func (b *Board) moveCanvasDown(index int) {
 	for i := index; i != 0; i-- {
-		for j := range b.canvas[i] {
-			if b.canvas[i-1][j] == nil {
-				b.canvas[i][j] = nil
+		for j := range b.Canvas[i] {
+			if b.Canvas[i-1][j] == nil {
+				b.Canvas[i][j] = nil
 			} else {
-				b.canvas[i][j] = b.canvas[i-1][j]
-				b.canvas[i][j].row += 1
-				b.canvas[i-1][j] = nil
+				b.Canvas[i][j] = b.Canvas[i-1][j]
+				b.Canvas[i][j].Row += 1
+				b.Canvas[i-1][j] = nil
 			}
 		}
 	}
 }
 
-func (b *board) canClearLine(index int) bool {
+func (b *Board) CanClearLine(index int) bool {
 	if index <= 0 {
 		return false
 	}
 	canClear := true
-	for _, block := range b.canvas[index] {
+	for _, block := range b.Canvas[index] {
 		if block == nil {
 			canClear = false
 			break

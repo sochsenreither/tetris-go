@@ -17,7 +17,7 @@ func TestRandomPiece(t *testing.T) {
 }
 
 func TestMovement(t *testing.T) {
-	pieces := []*piece{
+	pieces := []*Piece{
 		iPiece(),
 		lPiece(),
 		jPiece(),
@@ -28,7 +28,7 @@ func TestMovement(t *testing.T) {
 	}
 
 	for _, p := range pieces {
-		movements := map[string]func() *piece{
+		movements := map[string]func() *Piece{
 			"down":   p.moveDown,
 			"left":   p.moveLeft,
 			"right":  p.moveRight,

@@ -18,10 +18,10 @@ func (e *Engine) render() {
 		W: game.COLS*scale + 12,
 		H: game.ROWS*scale + 12,
 	})
-	for y, row := range e.game.Canvas() {
+	for y, row := range e.game.Board.Canvas {
 		for x, block := range row {
 			if block != nil {
-				e.renderBlock(block.Col(), block.Row(), block.Color())
+				e.renderBlock(block.Col, block.Row, block.Color)
 			} else {
 				e.renderCanvas(x, y)
 			}
@@ -37,7 +37,7 @@ func (e *Engine) render() {
 		e.renderPause()
 	}
 
-	if e.game.GameOVer() {
+	if e.game.Gameover {
 		e.renderGameOver()
 	}
 
@@ -46,12 +46,12 @@ func (e *Engine) render() {
 }
 
 func (e *Engine) renderNextPiece() {
-	p := e.game.NextPiece()
+	p := e.game.NextPiece
 	for x := 0; x < 4; x++ {
 		for y := 0; y < 2; y++ {
 			for _, block := range p.Blocks() {
-				if block.Col()-4 == x && block.Row() == y {
-					e.renderBlock(block.Col() + game.COLS/2 + 2, block.Row(), block.Color())
+				if block.Col-4 == x && block.Row == y {
+					e.renderBlock(block.Col + game.COLS/2 + 2, block.Row, block.Color)
 				}
 			}
 		}
@@ -147,8 +147,8 @@ func (e *Engine) renderStats() {
 	x := int32(WIDTH/2 - game.COLS*scale/2)
 	y := int32(HEIGHT/2 - 3*h)
 	e.renderText("Level:", x-3*scale, y, e.fontSmall)
-	e.renderText(strconv.Itoa(int(e.game.Level())), x-3*scale, y+scale+scale/2, e.fontSmall)
+	e.renderText(strconv.Itoa(int(e.game.Level)), x-3*scale, y+scale+scale/2, e.fontSmall)
 
 	e.renderText("Score:", x-3*scale, y+h, e.fontSmall)
-	e.renderText(strconv.Itoa(int(e.game.Score())), x-3*scale, y+scale+scale/2+h, e.fontSmall)
+	e.renderText(strconv.Itoa(int(e.game.Score)), x-3*scale, y+scale+scale/2+h, e.fontSmall)
 }
