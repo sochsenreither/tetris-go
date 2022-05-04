@@ -1,6 +1,7 @@
 # Tetris
 
-A simple Go implementation of Tetris clone with an AI based on the algorithm described [here](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/)
+A simple Go implementation of Tetris clone with an AI based on the algorithm described [here](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/)\
+The board size can be changed in `game/board.go`
 
 ![prev](https://user-images.githubusercontent.com/29070949/166774808-b7c6ef9c-696c-4007-8405-7c7392ed6373.png)
 
