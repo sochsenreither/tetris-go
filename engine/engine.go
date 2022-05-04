@@ -1,9 +1,6 @@
 package engine
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/sochsenreither/tetris-go/game"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -19,17 +16,16 @@ const (
 )
 
 type Engine struct {
-	window   *sdl.Window
-	renderer *sdl.Renderer
-	game     *game.Game
-	font     *ttf.Font
-	font1    *ttf.Font
-	pause    bool
-	running  bool
+	window    *sdl.Window
+	renderer  *sdl.Renderer
+	game      *game.Game
+	font      *ttf.Font
+	fontSmall *ttf.Font
+	pause     bool
+	running   bool
 }
 
 func NewEngine() (*Engine, error) {
-	rand.Seed(time.Now().Unix())
 	game := game.NewGame()
 	window, err := sdl.CreateWindow("tetris", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, sdl.WINDOW_SHOWN)
 	if err != nil {
@@ -56,13 +52,13 @@ func NewEngine() (*Engine, error) {
 	}
 
 	engine := &Engine{
-		window:   window,
-		renderer: renderer,
-		game:     game,
-		font:     font,
-		font1:    font1,
-		pause:    false,
-		running:  true,
+		window:    window,
+		renderer:  renderer,
+		game:      game,
+		font:      font,
+		fontSmall: font1,
+		pause:     false,
+		running:   true,
 	}
 
 	return engine, nil
@@ -74,43 +70,22 @@ func (e *Engine) Run() {
 	defer ttf.Quit()
 
 	counter := 0
-	interval := 50
 
 	for e.running {
+		interval := 50 - (int(e.game.Level()) * 3)
+		if interval < 5 {
+			interval = 5
+		}
 		e.renderer.SetDrawColor(35, 35, 35, 0)
 		e.renderer.Clear()
 		// Get direction
-		direction := ""
-		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch t := event.(type) {
-			case *sdl.QuitEvent:
-				e.running = false
-			case *sdl.KeyboardEvent:
-				if t.Type != sdl.KEYDOWN {
-					break
-				}
-				switch t.Keysym.Sym {
-				case sdl.K_ESCAPE:
-					e.running = false
-				case sdl.K_UP:
-					direction = "UP"
-				case sdl.K_DOWN:
-					direction = "DOWN"
-				case sdl.K_RIGHT:
-					direction = "RIGHT"
-				case sdl.K_LEFT:
-					direction = "LEFT"
-				case sdl.K_p:
-					e.pause = !e.pause
-				}
-			}
-		}
+		direction := e.getPlayerMove()
 
 		// Pass direction to game
 		if !e.pause && !e.game.GameOVer() {
 			var tick bool
 			counter += 1
-			if counter == interval {
+			if counter >= interval {
 				tick = true
 				counter = 0
 			}
@@ -120,4 +95,34 @@ func (e *Engine) Run() {
 		e.render()
 		sdl.Delay(16)
 	}
+}
+
+func (e *Engine) getPlayerMove() string {
+	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+		switch t := event.(type) {
+		case *sdl.QuitEvent:
+			e.running = false
+		case *sdl.KeyboardEvent:
+			if t.Type != sdl.KEYDOWN {
+				break
+			}
+			switch t.Keysym.Sym {
+			case sdl.K_ESCAPE:
+				e.running = false
+			case sdl.K_UP:
+				return "UP"
+			case sdl.K_DOWN:
+				return "DOWN"
+			case sdl.K_RIGHT:
+				return "RIGHT"
+			case sdl.K_LEFT:
+				return "LEFT"
+			case sdl.K_SPACE:
+				return "SPACE"
+			case sdl.K_p:
+				e.pause = !e.pause
+			}
+		}
+	}
+	return ""
 }

@@ -7,8 +7,9 @@ import (
 
 func TestRandomPiece(t *testing.T) {
 	pieces := make(map[string]bool)
+	pf := newPieceFactory()
 	for i := 0; i < 7; i++ {
-		pieces[randomPiece().t] = true
+		pieces[pf.randomPiece().t] = true
 	}
 	if len(pieces) != 7 {
 		t.Errorf("Expected to get every piece within seven tries, only got %d", len(pieces))

@@ -24,7 +24,7 @@ func TestGame(t *testing.T) {
 
 func TestGameOver(t *testing.T) {
 	g := NewGame()
-	p := randomPiece()
+	p := g.pieceFactory.randomPiece()
 	p.setInactive()
 	g.board.drawPiece(p)
 	g.Step("", false)
@@ -32,4 +32,3 @@ func TestGameOver(t *testing.T) {
 		t.Errorf("Expected game over")
 	}
 }
-

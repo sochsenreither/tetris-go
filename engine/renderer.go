@@ -4,9 +4,9 @@ import (
 	"image/color"
 	"strconv"
 
+	"github.com/sochsenreither/tetris-go/game"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
-	"github.com/sochsenreither/tetris-go/game"
 )
 
 func (e *Engine) render() {
@@ -146,9 +146,9 @@ func (e *Engine) renderStats() {
 	h := int32(4 * scale)
 	x := int32(WIDTH/2 - game.COLS*scale/2)
 	y := int32(HEIGHT/2 - 3*h)
-	e.renderText("Level:", x-3*scale, y, e.font1)
-	e.renderText(strconv.Itoa(int(e.game.Level())), x-3*scale, y+scale+scale/2, e.font1)
+	e.renderText("Level:", x-3*scale, y, e.fontSmall)
+	e.renderText(strconv.Itoa(int(e.game.Level())), x-3*scale, y+scale+scale/2, e.fontSmall)
 
-	e.renderText("Score:", x-3*scale, y+h, e.font1)
-	e.renderText(strconv.Itoa(int(e.game.Score())), x-3*scale, y+scale+scale/2+h, e.font1)
+	e.renderText("Score:", x-3*scale, y+h, e.fontSmall)
+	e.renderText(strconv.Itoa(int(e.game.Score())), x-3*scale, y+scale+scale/2+h, e.fontSmall)
 }

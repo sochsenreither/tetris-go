@@ -23,7 +23,8 @@ func TestNewBoard(t *testing.T) {
 func TestDrawPiece(t *testing.T) {
 	b1 := newBoard()
 	b2 := newBoard()
-	b1.drawPiece(randomPiece())
+	pf := newPieceFactory()
+	b1.drawPiece(pf.randomPiece())
 
 	if reflect.DeepEqual(b1.canvas, b2.canvas) {
 		t.Errorf("Expected a different canvas")
@@ -33,7 +34,8 @@ func TestDrawPiece(t *testing.T) {
 func TestRemovePiece(t *testing.T) {
 	b1 := newBoard()
 	b2 := newBoard()
-	p := randomPiece()
+	pf := newPieceFactory()
+	p := pf.randomPiece()
 	b1.drawPiece(p)
 	b1.removePiece(p)
 
@@ -71,7 +73,8 @@ func TestCollision(t *testing.T) {
 
 	t.Run("collision out of bounds", func(t *testing.T) {
 		b := newBoard()
-		p := randomPiece()
+		pf := newPieceFactory()
+		p := pf.randomPiece()
 		p.blocks[0].col, p.blocks[0].row = -1, 0
 		if !b.collision(p) {
 			t.Errorf("Expected a collision")
@@ -83,7 +86,8 @@ func TestCollision(t *testing.T) {
 	})
 	t.Run("no collision", func(t *testing.T) {
 		b := newBoard()
-		p := randomPiece()
+		pf := newPieceFactory()
+		p := pf.randomPiece()
 		if b.collision(p) {
 			t.Errorf("Didn't expect a collision")
 		}

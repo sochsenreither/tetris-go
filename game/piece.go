@@ -3,12 +3,22 @@ package game
 import (
 	"image/color"
 	"math/rand"
+	"time"
 )
 
-var pieces []*piece
+type pieceFactory struct {
+	pieces []*piece
+}
 
-func initPieces() {
-	pieces = []*piece{
+func newPieceFactory() *pieceFactory {
+	pf := &pieceFactory{}
+	pf.init()
+	return pf
+}
+
+func (pf *pieceFactory) init() {
+	rand.Seed(time.Now().Unix())
+	pieces := []*piece{
 		iPiece(),
 		jPiece(),
 		lPiece(),
@@ -18,11 +28,19 @@ func initPieces() {
 		zPiece(),
 	}
 	rand.Shuffle(len(pieces), func(i, j int) { pieces[i], pieces[j] = pieces[j], pieces[i] })
+	pf.pieces = pieces
 }
 
-func popPiece() *piece {
-	p := pieces[0]
-	pieces = pieces[1:]
+func (pf *pieceFactory) randomPiece() *piece {
+	if len(pf.pieces) == 0 {
+		pf.init()
+	}
+	p := pf.pieces[0]
+	pf.pieces = pf.pieces[1:]
+	// Spawns the block in the middle of the canvas
+	for _, b := range p.blocks {
+		b.col += COLS/2 - 1
+	}
 	return p
 }
 
@@ -106,18 +124,6 @@ func (p *piece) setInactive() {
 	for _, b := range p.blocks {
 		b.inactive = true
 	}
-}
-
-func randomPiece() *piece {
-	if len(pieces) == 0 {
-		initPieces()
-	}
-	p := popPiece()
-	// Spawns the block in the middle of the canvas
-	for _, b := range p.blocks {
-		b.col += COLS/2 - 1
-	}
-	return p
 }
 
 func iPiece() *piece {

@@ -4,6 +4,7 @@ type Game struct {
 	board        *board
 	activePiece  *piece
 	nextPiece    *piece
+	pieceFactory *pieceFactory
 	score        uint
 	level        uint
 	clearedLines uint
@@ -15,6 +16,7 @@ func NewGame() *Game {
 		board:        newBoard(),
 		activePiece:  nil,
 		nextPiece:    nil,
+		pieceFactory: newPieceFactory(),
 		score:        0,
 		level:        0,
 		clearedLines: 0,
@@ -26,19 +28,19 @@ func (g *Game) Step(direction string, tick bool) {
 	// If there is no active piece spawn a new one
 	if g.activePiece == nil {
 		if g.nextPiece == nil {
-			g.nextPiece = randomPiece()
+			g.nextPiece = g.pieceFactory.randomPiece()
 		}
 		if g.board.collision(g.nextPiece) {
 			g.gameover = true
 			return
 		}
 		g.activePiece = g.nextPiece
-		g.nextPiece = randomPiece()
+		g.nextPiece = g.pieceFactory.randomPiece()
 	}
 
 	if g.clearedLines >= 10 {
 		g.level++
-		g.clearedLines -= 2
+		g.clearedLines = 0
 	}
 
 	var p *piece
@@ -67,6 +69,17 @@ func (g *Game) Step(direction string, tick bool) {
 		p = g.activePiece.moveLeft()
 	case "RIGHT":
 		p = g.activePiece.moveRight()
+	case "SPACE":
+		collision := false
+		for !collision {
+			p = g.activePiece.moveDown()
+			if g.board.collision(p) {
+				g.handleDroppedPiece()
+				return
+			}
+			g.board.removePiece(g.activePiece)
+			g.activePiece = p
+		}
 	default:
 		g.board.drawPiece(g.activePiece)
 		return
