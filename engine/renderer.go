@@ -47,14 +47,8 @@ func (e *Engine) render() {
 
 func (e *Engine) renderNextPiece() {
 	p := e.game.NextPiece
-	for x := 0; x < 4; x++ {
-		for y := 0; y < 2; y++ {
-			for _, block := range p.Blocks {
-				if block.Col-4 == x && block.Row == y {
-					e.renderBlock(block.Col+game.COLS/2+2, block.Row, block.Color)
-				}
-			}
-		}
+	for _, block := range p.Blocks {
+		e.renderBlock(block.Col+game.COLS/2+2, block.Row, block.Color)
 	}
 }
 
