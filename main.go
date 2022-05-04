@@ -1,15 +1,22 @@
 package main
 
-import "github.com/sochsenreither/tetris-go/engine"
+import (
+	"flag"
 
-// TODO: AI
-// TODO: When game over press start for new game
-// TODO: persistent high scores
+	"github.com/sochsenreither/tetris-go/engine"
+)
 
 func main() {
+	ai := flag.Bool("ai", false, "Run tetris with the ai")
+	flag.Parse()
+
 	e, err := engine.NewEngine()
 	if err != nil {
 		panic(err)
 	}
-	e.Run()
+	if *ai {
+		e.RunAI()
+	} else {
+		e.Run()
+	}
 }

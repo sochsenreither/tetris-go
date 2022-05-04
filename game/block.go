@@ -8,3 +8,12 @@ type Block struct {
 	Color    color.Color
 	Inactive bool
 }
+
+func (b *Block) clone() *Block {
+	return &Block{
+		Row:      b.Row,
+		Col:      b.Col,
+		Color:    b.Color,
+		Inactive: b.Inactive,
+	}
+}

@@ -16,14 +16,14 @@ func (e *Engine) render() {
 		X: xOffset - 6,
 		Y: yOffset - 6,
 		W: game.COLS*scale + 12,
-		H: game.ROWS*scale + 12,
+		H: (game.ROWS)*scale + 12,
 	})
 	for y, row := range e.game.Board.Canvas {
 		for x, block := range row {
 			if block != nil {
 				e.renderBlock(block.Col, block.Row, block.Color)
 			} else {
-				e.renderCanvas(x, y)
+				e.renderCanvasBlock(x, y)
 			}
 		}
 	}
@@ -49,9 +49,9 @@ func (e *Engine) renderNextPiece() {
 	p := e.game.NextPiece
 	for x := 0; x < 4; x++ {
 		for y := 0; y < 2; y++ {
-			for _, block := range p.Blocks() {
+			for _, block := range p.Blocks {
 				if block.Col-4 == x && block.Row == y {
-					e.renderBlock(block.Col + game.COLS/2 + 2, block.Row, block.Color)
+					e.renderBlock(block.Col+game.COLS/2+2, block.Row, block.Color)
 				}
 			}
 		}
@@ -113,7 +113,7 @@ func (e *Engine) renderText(text string, x, y int32, font *ttf.Font) error {
 	return nil
 }
 
-func (e *Engine) renderCanvas(x, y int) {
+func (e *Engine) renderCanvasBlock(x, y int) {
 	e.renderer.SetDrawColor(75, 75, 75, 255)
 	rect := &sdl.Rect{
 		X: int32(x*scale + xOffset),
@@ -128,7 +128,7 @@ func (e *Engine) renderCanvas(x, y int) {
 }
 
 func (e *Engine) renderBlock(x, y int, color color.Color) {
-	r,g,b,a := color.RGBA()
+	r, g, b, a := color.RGBA()
 	e.renderer.SetDrawColor(uint8(r), uint8(g), uint8(b), uint8(a))
 	rect := &sdl.Rect{
 		X: int32(x)*scale + xOffset,

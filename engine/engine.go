@@ -75,16 +75,20 @@ func (e *Engine) Run() {
 	counter := 0
 
 	for e.running {
-		interval := 50 - (int(e.game.Level) * 3)
+		e.game.Init()
+		interval := 30 - (int(e.game.Level) * 3)
 		if interval < 5 {
 			interval = 5
 		}
 		e.renderer.SetDrawColor(35, 35, 35, 0)
 		e.renderer.Clear()
 		// Get direction
-		// direction := e.getPlayerMove()
 		direction := e.getPlayerMove()
-		// direction := e.ai.NextMove(e.game.Board, e.game.ActivePiece)
+
+		if direction == "RETURN" && e.game.Gameover {
+			e.game = game.NewGame()
+			continue
+		}
 
 		// Pass direction to game
 		if !e.pause && !e.game.Gameover {
@@ -95,6 +99,36 @@ func (e *Engine) Run() {
 				counter = 0
 			}
 			e.game.Step(direction, tick)
+		}
+
+		e.render()
+		sdl.Delay(16)
+	}
+}
+
+func (e *Engine) RunAI() {
+	defer e.window.Destroy()
+	defer e.renderer.Destroy()
+	defer ttf.Quit()
+
+	aiCall := true
+
+	for e.running {
+		e.game.Init()
+		e.renderer.SetDrawColor(35, 35, 35, 0)
+		e.renderer.Clear()
+		e.getPlayerMove()
+		direction := "DOWN"
+		if aiCall {
+			aiCall = false
+			e.game.ActivePiece = e.ai.NextMove(e.game.Board, e.game.ActivePiece)
+		}
+
+		// Pass direction to game
+		if !e.pause && !e.game.Gameover {
+			if e.game.Step(direction, true) {
+				aiCall = true
+			}
 		}
 
 		e.render()
@@ -122,6 +156,8 @@ func (e *Engine) getPlayerMove() string {
 				return "RIGHT"
 			case sdl.K_LEFT:
 				return "LEFT"
+			case sdl.K_RETURN:
+				return "RETURN"
 			case sdl.K_SPACE:
 				return "SPACE"
 			case sdl.K_p:

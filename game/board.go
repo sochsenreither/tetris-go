@@ -20,20 +20,20 @@ func NewBoard() *Board {
 }
 
 func (b *Board) DrawPiece(p *Piece) {
-	for _, block := range p.blocks {
+	for _, block := range p.Blocks {
 		b.Canvas[block.Row][block.Col] = block
 	}
 }
 
 func (b *Board) RemovePiece(p *Piece) {
-	for _, block := range p.blocks {
+	for _, block := range p.Blocks {
 		b.Canvas[block.Row][block.Col] = nil
 	}
 }
 
 // Returns true if there is a Collision
 func (b *Board) Collision(p *Piece) bool {
-	for _, block := range p.blocks {
+	for _, block := range p.Blocks {
 		if block.Row < 0 || block.Row > ROWS-1 {
 			return true
 		}

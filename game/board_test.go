@@ -62,7 +62,7 @@ func TestCollision(t *testing.T) {
 		b := NewBoard()
 		p := oPiece()
 		o1 := oPiece()
-		for _, block := range p.blocks {
+		for _, block := range p.Blocks {
 			block.Inactive = true
 		}
 		b.DrawPiece(p)
@@ -75,11 +75,11 @@ func TestCollision(t *testing.T) {
 		b := NewBoard()
 		pf := newPieceFactory()
 		p := pf.randomPiece()
-		p.blocks[0].Col, p.blocks[0].Row = -1, 0
+		p.Blocks[0].Col, p.Blocks[0].Row = -1, 0
 		if !b.Collision(p) {
 			t.Errorf("Expected a collision")
 		}
-		p.blocks[0].Col, p.blocks[0].Row = 0, ROWS
+		p.Blocks[0].Col, p.Blocks[0].Row = 0, ROWS
 		if !b.Collision(p) {
 			t.Errorf("Expected a collision")
 		}

@@ -24,19 +24,9 @@ func NewGame() *Game {
 	}
 }
 
-func (g *Game) Step(direction string, tick bool) {
+// Returns true if a new piece was spawned
+func (g *Game) Step(direction string, tick bool) bool {
 	// If there is no active piece spawn a new one
-	if g.ActivePiece == nil {
-		if g.NextPiece == nil {
-			g.NextPiece = g.pieceFactory.randomPiece()
-		}
-		if g.Board.Collision(g.NextPiece) {
-			g.Gameover = true
-			return
-		}
-		g.ActivePiece = g.NextPiece
-		g.NextPiece = g.pieceFactory.randomPiece()
-	}
 
 	if g.clearedLines >= 10 {
 		g.Level++
@@ -46,10 +36,10 @@ func (g *Game) Step(direction string, tick bool) {
 	var p *Piece
 
 	if tick {
-		p = g.ActivePiece.moveDown()
+		p = g.ActivePiece.MoveDown()
 		if g.Board.Collision(p) {
 			g.handleDroppedPiece()
-			return
+			return true
 		}
 		g.Board.RemovePiece(g.ActivePiece)
 		g.ActivePiece = p
@@ -57,24 +47,24 @@ func (g *Game) Step(direction string, tick bool) {
 
 	switch direction {
 	case "DOWN":
-		p = g.ActivePiece.moveDown()
+		p = g.ActivePiece.MoveDown()
 		if g.Board.Collision(p) {
 			g.handleDroppedPiece()
-			return
+			return true
 		}
 		g.Score += 1
 	case "UP":
-		p = g.ActivePiece.rotate()
+		p = g.ActivePiece.Rotate()
 	case "LEFT":
-		p = g.ActivePiece.moveLeft()
+		p = g.ActivePiece.MoveLeft()
 	case "RIGHT":
-		p = g.ActivePiece.moveRight()
+		p = g.ActivePiece.MoveRight()
 	case "SPACE":
 		for {
-			p = g.ActivePiece.moveDown()
+			p = g.ActivePiece.MoveDown()
 			if g.Board.Collision(p) {
 				g.handleDroppedPiece()
-				return
+				return true
 			}
 			g.Board.RemovePiece(g.ActivePiece)
 			g.ActivePiece = p
@@ -82,13 +72,27 @@ func (g *Game) Step(direction string, tick bool) {
 		}
 	default:
 		g.Board.DrawPiece(g.ActivePiece)
-		return
+		return false
 	}
 
 	if !g.Board.Collision(p) {
 		g.Board.RemovePiece(g.ActivePiece)
 		g.ActivePiece = p
 		g.Board.DrawPiece(g.ActivePiece)
+	}
+	return false
+}
+
+func (g *Game) Init() {
+	if g.ActivePiece == nil {
+		if g.NextPiece == nil {
+			g.NextPiece = g.pieceFactory.randomPiece()
+		}
+		if g.Board.Collision(g.NextPiece) {
+			g.Gameover = true
+		}
+		g.ActivePiece = g.NextPiece
+		g.NextPiece = g.pieceFactory.randomPiece()
 	}
 }
 

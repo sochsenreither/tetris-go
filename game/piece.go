@@ -6,6 +6,16 @@ import (
 	"time"
 )
 
+var (
+	mint        = color.RGBA{72, 207, 173, 255}
+	bluejeans   = color.RGBA{93, 156, 236, 255}
+	bittersweet = color.RGBA{252, 110, 81, 255}
+	sunflower   = color.RGBA{255, 206, 84, 255}
+	grass       = color.RGBA{160, 212, 104, 255}
+	lavender    = color.RGBA{172, 146, 236, 255}
+	ruby        = color.RGBA{216, 51, 74, 255}
+)
+
 type pieceFactory struct {
 	pieces []*Piece
 }
@@ -38,100 +48,97 @@ func (pf *pieceFactory) randomPiece() *Piece {
 	p := pf.pieces[0]
 	pf.pieces = pf.pieces[1:]
 	// Spawns the block in the middle of the canvas
-	for _, b := range p.blocks {
+	for _, b := range p.Blocks {
 		b.Col += COLS/2 - 1
 	}
 	return p
 }
 
-var (
-	mint        = color.RGBA{72, 207, 173, 255}
-	bluejeans   = color.RGBA{93, 156, 236, 255}
-	bittersweet = color.RGBA{252, 110, 81, 255}
-	sunflower   = color.RGBA{255, 206, 84, 255}
-	grass       = color.RGBA{160, 212, 104, 255}
-	lavender    = color.RGBA{172, 146, 236, 255}
-	ruby        = color.RGBA{216, 51, 74, 255}
-)
-
 // The pivot point is always at index 0.
 type Piece struct {
-	t      string
-	blocks []*Block
+	T      string
+	Blocks []*Block
 }
 
-func (p *Piece) Blocks() []*Block {
-	return p.blocks
+func (p *Piece) Clone() *Piece {
+	piece := &Piece{
+		T: p.T,
+		Blocks: make([]*Block, 4),
+	}
+	for i, block := range p.Blocks {
+		piece.Blocks[i] = block.clone()
+	}
+	return piece
 }
 
-func (p *Piece) moveDown() *Piece {
+func (p *Piece) MoveDown() *Piece {
 	return p.move(1, 0)
 }
 
-func (p *Piece) moveLeft() *Piece {
+func (p *Piece) MoveLeft() *Piece {
 	return p.move(0, -1)
 }
 
-func (p *Piece) moveRight() *Piece {
+func (p *Piece) MoveRight() *Piece {
 	return p.move(0, 1)
 }
 
 func (p *Piece) move(x, y int) *Piece {
 	blocks := make([]*Block, 4)
-	for i := range p.blocks {
+	for i := range p.Blocks {
 		blocks[i] = &Block{
-			Row:      p.blocks[i].Row + x,
-			Col:      p.blocks[i].Col + y,
-			Color:    p.blocks[i].Color,
-			Inactive: p.blocks[i].Inactive,
+			Row:      p.Blocks[i].Row + x,
+			Col:      p.Blocks[i].Col + y,
+			Color:    p.Blocks[i].Color,
+			Inactive: p.Blocks[i].Inactive,
 		}
 	}
 	return &Piece{
-		t:      p.t,
-		blocks: blocks,
+		T:      p.T,
+		Blocks: blocks,
 	}
 }
 
-func (p *Piece) rotate() *Piece {
-	if p.t == "O" {
+func (p *Piece) Rotate() *Piece {
+	if p.T == "O" {
 		return p
 	}
 
 	blocks := make([]*Block, 4)
-	pivot := p.blocks[0]
+	pivot := p.Blocks[0]
 	blocks[0] = pivot
 
 	for i := range blocks {
 		if i == 0 {
 			continue
 		}
-		dRow := pivot.Row - p.blocks[i].Row
-		dCol := pivot.Col - p.blocks[i].Col
+		dRow := pivot.Row - p.Blocks[i].Row
+		dCol := pivot.Col - p.Blocks[i].Col
 		blocks[i] = &Block{
 			Row:      pivot.Row + (dCol * -1),
 			Col:      pivot.Col + dRow,
-			Color:    p.blocks[0].Color,
-			Inactive: p.blocks[0].Inactive,
+			Color:    p.Blocks[0].Color,
+			Inactive: p.Blocks[0].Inactive,
 		}
 	}
 	return &Piece{
-		t:      p.t,
-		blocks: blocks,
+		T:      p.T,
+		Blocks: blocks,
 	}
 }
 
 func (p *Piece) setInactive() {
-	for _, b := range p.blocks {
+	for _, b := range p.Blocks {
 		b.Inactive = true
 	}
 }
 
 func iPiece() *Piece {
 	return &Piece{
-		t: "I",
-		blocks: []*Block{
-			{Row: 1, Col: 2, Color: mint, Inactive: false},
+		T: "I",
+		Blocks: []*Block{
 			{Row: 1, Col: 1, Color: mint, Inactive: false},
+			{Row: 1, Col: 2, Color: mint, Inactive: false},
 			{Row: 1, Col: 0, Color: mint, Inactive: false},
 			{Row: 1, Col: 3, Color: mint, Inactive: false},
 		},
@@ -140,8 +147,8 @@ func iPiece() *Piece {
 
 func lPiece() *Piece {
 	return &Piece{
-		t: "L",
-		blocks: []*Block{
+		T: "L",
+		Blocks: []*Block{
 			{Row: 1, Col: 1, Color: bittersweet, Inactive: false},
 			{Row: 1, Col: 0, Color: bittersweet, Inactive: false},
 			{Row: 1, Col: 2, Color: bittersweet, Inactive: false},
@@ -152,8 +159,8 @@ func lPiece() *Piece {
 
 func jPiece() *Piece {
 	return &Piece{
-		t: "J",
-		blocks: []*Block{
+		T: "J",
+		Blocks: []*Block{
 			{Row: 1, Col: 1, Color: bluejeans, Inactive: false},
 			{Row: 1, Col: 0, Color: bluejeans, Inactive: false},
 			{Row: 0, Col: 0, Color: bluejeans, Inactive: false},
@@ -164,8 +171,8 @@ func jPiece() *Piece {
 
 func oPiece() *Piece {
 	return &Piece{
-		t: "O",
-		blocks: []*Block{
+		T: "O",
+		Blocks: []*Block{
 			{Row: 0, Col: 0, Color: sunflower, Inactive: false},
 			{Row: 1, Col: 1, Color: sunflower, Inactive: false},
 			{Row: 0, Col: 1, Color: sunflower, Inactive: false},
@@ -176,8 +183,8 @@ func oPiece() *Piece {
 
 func sPiece() *Piece {
 	return &Piece{
-		t: "S",
-		blocks: []*Block{
+		T: "S",
+		Blocks: []*Block{
 			{Row: 1, Col: 1, Color: grass, Inactive: false},
 			{Row: 1, Col: 0, Color: grass, Inactive: false},
 			{Row: 0, Col: 1, Color: grass, Inactive: false},
@@ -188,8 +195,8 @@ func sPiece() *Piece {
 
 func tPiece() *Piece {
 	return &Piece{
-		t: "T",
-		blocks: []*Block{
+		T: "T",
+		Blocks: []*Block{
 			{Row: 1, Col: 1, Color: lavender, Inactive: false},
 			{Row: 1, Col: 0, Color: lavender, Inactive: false},
 			{Row: 0, Col: 1, Color: lavender, Inactive: false},
@@ -200,8 +207,8 @@ func tPiece() *Piece {
 
 func zPiece() *Piece {
 	return &Piece{
-		t: "Z",
-		blocks: []*Block{
+		T: "Z",
+		Blocks: []*Block{
 			{Row: 1, Col: 1, Color: ruby, Inactive: false},
 			{Row: 0, Col: 0, Color: ruby, Inactive: false},
 			{Row: 0, Col: 1, Color: ruby, Inactive: false},
