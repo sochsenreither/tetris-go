@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -101,16 +100,16 @@ func TestCanClearLine(t *testing.T) {
 	}
 }
 
-func debugPrint(canvas [][]*Block) {
-	for _, row := range canvas {
-		for _, b := range row {
-			if b == nil {
-				fmt.Printf("_")
-			} else {
-				fmt.Printf("o")
-			}
-		}
-		fmt.Printf("\n")
-	}
-	fmt.Printf("\n")
-}
+// func debugPrint(canvas [][]*Block) {
+// 	for _, row := range canvas {
+// 		for _, b := range row {
+// 			if b == nil {
+// 				fmt.Printf("_")
+// 			} else {
+// 				fmt.Printf("o")
+// 			}
+// 		}
+// 		fmt.Printf("\n")
+// 	}
+// 	fmt.Printf("\n")
+// }
