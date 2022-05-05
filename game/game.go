@@ -24,10 +24,8 @@ func NewGame() *Game {
 	}
 }
 
-// Returns true if a new piece was spawned
+// Returns true if a piece was dropped
 func (g *Game) Step(direction string, tick bool) bool {
-	// If there is no active piece spawn a new one
-
 	if g.clearedLines >= 10 {
 		g.Level++
 		g.clearedLines = 0
@@ -83,7 +81,7 @@ func (g *Game) Step(direction string, tick bool) bool {
 	return false
 }
 
-func (g *Game) Init() {
+func (g *Game) SpawnPiece() {
 	if g.ActivePiece == nil {
 		if g.NextPiece == nil {
 			g.NextPiece = g.pieceFactory.randomPiece()

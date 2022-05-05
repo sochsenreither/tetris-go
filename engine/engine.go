@@ -75,7 +75,6 @@ func (e *Engine) Run() {
 	counter := 0
 
 	for e.running {
-		e.game.Init()
 		interval := 30 - (int(e.game.Level) * 3)
 		if interval < 5 {
 			interval = 5
@@ -98,6 +97,7 @@ func (e *Engine) Run() {
 				tick = true
 				counter = 0
 			}
+			e.game.SpawnPiece()
 			e.game.Step(direction, tick)
 		}
 
@@ -114,13 +114,14 @@ func (e *Engine) RunAI() {
 	aiCall := true
 
 	for e.running {
-		e.game.Init()
 		e.renderer.SetDrawColor(35, 35, 35, 0)
 		e.renderer.Clear()
 		e.getPlayerMove()
 		direction := "DOWN"
+		
 		if aiCall {
 			aiCall = false
+			e.game.SpawnPiece()
 			e.game.ActivePiece = e.ai.NextMove(e.game.Board, e.game.ActivePiece)
 		}
 

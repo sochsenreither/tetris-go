@@ -4,7 +4,7 @@ import "testing"
 
 func TestGame(t *testing.T) {
 	g := NewGame()
-	g.Init()
+	g.SpawnPiece()
 	g.Step("", false)
 	if g.ActivePiece == nil {
 		t.Errorf("Expected a piece to spawn")
@@ -22,4 +22,3 @@ func TestGame(t *testing.T) {
 	g.Step("LEFT", false)
 	g.Step("RIGHT", false)
 }
-
