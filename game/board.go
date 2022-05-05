@@ -49,7 +49,7 @@ func (b *Board) Collision(p *Piece) bool {
 
 func (b *Board) clearLines() int {
 	count := 0
-	for i := ROWS - 1; i != 0; i-- {
+	for i := ROWS - 1; i > 0; i-- {
 		for b.CanClearLine(i) {
 			count++
 			b.moveCanvasDown(i)
@@ -73,15 +73,10 @@ func (b *Board) moveCanvasDown(index int) {
 }
 
 func (b *Board) CanClearLine(index int) bool {
-	if index <= 0 {
-		return false
-	}
-	canClear := true
 	for _, block := range b.Canvas[index] {
 		if block == nil {
-			canClear = false
-			break
+			return false
 		}
 	}
-	return canClear
+	return true
 }
